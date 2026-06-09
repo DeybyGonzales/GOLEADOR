@@ -1,0 +1,102 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: goleador_db
+    environment:
+      POSTGRES_DB: goleador
+      POSTGRES_USER: goleador_user
+      POSTGRES_PASSWORD: goleador_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - goleador_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U goleador_user -d goleador"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend1:
+    build: ./backend
+    container_name: goleador_api_1
+    environment:
+      PORT: 3000
+      INSTANCE_ID: "1"
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: goleador
+      DB_USER: goleador_user
+      DB_PASS: goleador_pass
+      JWT_SECRET: goleador_jwt_secret_2026
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - goleador_net
+    restart: unless-stopped
+
+  backend2:
+    build: ./backend
+    container_name: goleador_api_2
+    environment:
+      PORT: 3000
+      INSTANCE_ID: "2"
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: goleador
+      DB_USER: goleador_user
+      DB_PASS: goleador_pass
+      JWT_SECRET: goleador_jwt_secret_2026
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - goleador_net
+    restart: unless-stopped
+
+  backend3:
+    build: ./backend
+    container_name: goleador_api_3
+    environment:
+      PORT: 3000
+      INSTANCE_ID: "3"
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: goleador
+      DB_USER: goleador_user
+      DB_PASS: goleador_pass
+      JWT_SECRET: goleador_jwt_secret_2026
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - goleador_net
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: goleador_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./frontend/dist:/usr/share/nginx/html
+    depends_on:
+      - backend1
+      - backend2
+      - backend3
+    networks:
+      - goleador_net
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  goleador_net:
+    driver: bridge
