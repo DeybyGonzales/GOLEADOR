@@ -3,6 +3,8 @@ import Login from "./Login";
 import Partidos from "./Partidos";
 import Ranking from "./Ranking";
 import Salas from "./Salas";
+import ProximoPartido from "./ProximoPartido";
+import Admin from "./Admin";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -42,16 +44,22 @@ export default function App() {
             style={{ ...styles.navBtn, ...(pantalla === "salas" ? styles.navActive : {}) }}
             onClick={() => setPantalla("salas")}
           >Salas</button>
+          <button
+            style={{ ...styles.navBtn, ...(pantalla === "admin" ? styles.navActive : {}) }}
+            onClick={() => setPantalla("admin")}
+          >Admin</button>
         </nav>
         <div style={styles.userInfo}>
           <span style={styles.userName}>👤 {user.nombre}</span>
           <button style={styles.logoutBtn} onClick={handleLogout}>Salir</button>
         </div>
       </div>
+      <ProximoPartido />
       <div style={styles.content}>
         {pantalla === "partidos" && <Partidos />}
         {pantalla === "ranking" && <Ranking />}
         {pantalla === "salas" && <Salas />}
+        {pantalla === "admin" && <Admin />}
       </div>
     </div>
   );
